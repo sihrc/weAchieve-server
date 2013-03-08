@@ -51,6 +51,13 @@ app.all('/logout', olinapps.logout);
 app.all('/*', olinapps.middleware);
 app.all('/*', olinapps.loginRequired);
 
+app.all('/*', function (req, res, next) {
+  if (olinapps.user(req).domain != 'students.olin.edu') {
+    return res.send('<h1>Students only.</h1> <p>Sorry, this application is closed to non-students. Please apply for next candidates\' weekend!</p>');
+  }
+  next();
+});
+
 /**
  * Routes
  */
