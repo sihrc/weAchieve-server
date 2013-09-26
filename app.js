@@ -59,17 +59,23 @@ app.get('/', function (req, res) {
 });
 
 app.get('/tweets', function (req, res) {
-  db.tweets.find({
-    // published: true
-  }).sort({date: -1}, function (err, docs) {
+  var query = { };
+  if ('q' in req.query) {
+    query.tweet = {$regex: ".*" + req.query.q + ".*"};
+  }
+  db.tweets.find(query).sort({date: -1}, function (err, docs) {
     res.json({"tweets": docs});
   })
 });
 
 app.get('/:username/tweets', function (req, res) {
-  db.tweets.find({
-    username: req.params.username
-  }).sort({date: -1}, function (err, docs) {
+  var query = {
+    username: req.params.username 
+  };
+  if ('q' in req.query) {
+    query.tweet = {$regex: ".*" + req.query.q + ".*"};
+  }
+  db.tweets.find(query).sort({date: -1}, function (err, docs) {
     res.json({"tweets": docs});
   })
 });
