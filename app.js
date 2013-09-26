@@ -9,8 +9,6 @@ var express = require('express')
   , mongojs = require('mongojs')
   , MongoStore = require('connect-mongo')(express);
 
-var ObjectId = mongojs.ObjectId;
-
 var app = express(), db;
 
 app.configure(function () {
@@ -96,7 +94,7 @@ app.get('/tweets/:id', function (req, res) {
 
 app.del('/tweets/:id', function (req, res) {
   db.tweets.remove({
-    _id: ObjectId(req.body.id)
+    _id: db.ObjectId(req.params.id)
   }, function (err) {
     res.json({"error": err})
   })
