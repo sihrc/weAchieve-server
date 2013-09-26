@@ -98,7 +98,7 @@ app.post('/delete', function (req, res) {
 
 app.get('/users', function (req, res) {
   db.tweets.distinct('username', function (err, names) {
-    res.json(names);
+    res.json({"usernames": names});
   });
 })
 

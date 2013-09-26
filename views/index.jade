@@ -16,7 +16,7 @@ block content
     for quote in quotes
       li
         blockquote
-          p #{quote.quote}
+          p #{quote.tweet}
           form(action="/delete", method="post")
             em
               cite &mdash; @#{quote.username}  

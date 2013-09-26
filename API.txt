@@ -87,3 +87,19 @@ Make someone follow another person. Submit a payload:
   "username": "horse_ebooks"
 }
 ```
+
+# Users
+
+List all users.
+
+GET /users
+See what users exist. Returns:
+
+```js
+{
+  "usernames": [
+    "horse_ebooks",
+    "timmy"
+  ]
+}
+```
