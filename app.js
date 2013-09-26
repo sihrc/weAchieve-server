@@ -6,14 +6,13 @@
 var express = require('express')
   , http = require('http')
   , path = require('path')
-  , olinapps = require('olinapps')
   , mongojs = require('mongojs')
   , MongoStore = require('connect-mongo')(express);
 
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'olinapps-quotes', ['quotes']);
+  db = mongojs(process.env.MONGOLAB_URI || 'twitterproto', ['tweets']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -26,7 +25,7 @@ app.configure(function () {
   app.use(express.session({
     secret: app.get('secret'),
     store: new MongoStore({
-      url: process.env.MONGOLAB_URI || 'mongodb://localhost/olinapps-quotes'
+      url: process.env.MONGOLAB_URI || 'mongodb://localhost/twitterproto'
     })
   }));
   app.use(app.router);
@@ -39,23 +38,7 @@ app.configure('development', function () {
 });
 
 app.configure('production', function () {
-  app.set('host', 'quotes.olinapps.com');
-});
-
-/**
- * Authentication
- */
-
-app.post('/login', olinapps.login);
-app.all('/logout', olinapps.logout);
-app.all('/*', olinapps.middleware);
-app.all('/*', olinapps.loginRequired);
-
-app.all('/*', function (req, res, next) {
-  if (olinapps.user(req).domain != 'students.olin.edu') {
-    return res.send('<h1>Students only.</h1> <p>Sorry, this application is closed to non-students. Please apply for next candidates\' weekend!</p>');
-  }
-  next();
+  app.set('host', 'twitterproto.herokuapp.com');
 });
 
 /**
@@ -63,22 +46,21 @@ app.all('/*', function (req, res, next) {
  */
 
 app.get('/', function (req, res) {
-  db.quotes.find({
+  db.tweets.find({
     published: true
   }).sort({date: -1}, function (err, docs) {
     console.log(docs);
     res.render('index', {
-      title: 'Olin Quotes Board v4.0',
+      title: 'TweetProto',
       quotes: docs,
-      user: olinapps.user(req)
+      user: {}
     });
   })
 });
 
 app.post('/delete', function (req, res) {
-  db.quotes.update({
-    _id: db.ObjectId(req.body.id),
-    submitter: olinapps.user(req).username
+  db.tweets.update({
+    _id: db.ObjectId(req.body.id)
   }, {
     $set: {
       published: false
@@ -88,18 +70,17 @@ app.post('/delete', function (req, res) {
   })
 })
 
-app.get('/names', function (req, res) {
-  db.quotes.distinct('name', function (err, names) {
+app.get('/users', function (req, res) {
+  db.tweets.distinct('submitter', function (err, names) {
     res.json(names);
   });
 })
 
-app.post('/quotes', function (req, res) {
-  if (req.body.name && req.body.quote) {
-    db.quotes.save({
-      name: req.body.name,
+app.post('/:username/quotes', function (req, res) {
+  if (req.body.quote) {
+    db.tweets.save({
       quote: req.body.quote,
-      submitter: olinapps.user(req).username,
+      submitter: req.params.username,
       date: Date.now(),
       published: true
     }, res.redirect.bind(res, '/'));

@@ -1,0 +1,28 @@
+# Tweeting
+
+You cool
+
+GET /tweets
+Get all user tweets. Returns: 
+
+```js
+function () {
+  
+}
+```
+
+POST /:username/tweets
+Post a new tweet. Body is `{"status": "...text..."}`
+
+GET /:username/tweets
+Get all the tweets for a user.
+
+# Searching
+
+More more
+
+GET /tweets?q=<pattern>
+Search for all tweets that match a particular pattern.
+
+GET /:username/tweets?q=<pattern>
+Search for all tweets from a user that match a particular pattern.
