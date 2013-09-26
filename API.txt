@@ -3,40 +3,84 @@
 Retrieve, post, and search tweets.
 
 GET /tweets
-Get all user tweets. Returns: 
+Get all tweets, ever! Returns: 
 
 ```js
 {
-  "status": "Everything happens so much",
-  "datetime": "2013-09-03T00:00:00",
-  "username": "horse_ebooks" 
+  "tweets": [
+    {
+      "status": "Everything happens so much",
+      "datetime": "2013-09-03T00:00:00",
+      "username": "horse_ebooks" 
+    }
+    ...
+  ]
 }
 ```
 
 POST /:username/tweets
-Post a new tweet. Body is `{"status": "...text..."}`
+Post a new tweet as a user. Your status should be <= 140 characters! Submit a payload:
+
+```
+{
+  "status": "...text..."
+}
+```
 
 GET /:username/tweets
-Get all the tweets for a user.
+Get all the tweets for a user. Returns:
 
-GET /tweets?q=<pattern>
-Search for all tweets that match a particular pattern.
+```js
+{
+  "tweets": [
+    {
+      "status": "Everything happens so much",
+      "datetime": "2013-09-03T00:00:00",
+      "username": "horse_ebooks" 
+    }
+    ...
+  ]
+}
+```
 
-GET /:username/tweets?q=<pattern>
-Search for all tweets from a user that match a particular pattern.
+GET /tweets?q=:pattern
+Search for all tweets that include `:pattern`. See /tweets.
+
+GET /:username/tweets?q=:pattern
+Search for all tweets from a user that include `:pattern`. See /`:username`/tweets.
 
 # Follows
 
 Connect people, see who follows whom, etc.
 
 GET /:username/followers
-See who follows this user.
+See who follows this user. Returns:
+
+```js
+{
+  "followers": [
+    "horse_ebooks",
+    "reyner",
+    "renyer"
+  ]
+}
+```
 
 GET /:username/following
-See who this user is following.
+See who this user is following. Returns:
+
+```js
+{
+  "following": [
+    "horse_ebooks",
+    "reyner",
+    "renyer"
+  ]
+}
+```
 
 POST /:username/follow
-Submit a payload like:
+Make someone follow another person. Submit a payload:
 
 ```js
 {
