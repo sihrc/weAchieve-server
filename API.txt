@@ -6,8 +6,10 @@ GET /tweets
 Get all user tweets. Returns: 
 
 ```js
-function () {
-  
+{
+  "status": "Everything happens so much",
+  "datetime": "2013-09-03T00:00:00",
+  "username": "horse_ebooks" 
 }
 ```
 
