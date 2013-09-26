@@ -159,9 +159,9 @@ app.get('/users', function (req, res) {
 })
 
 app.post('/:username/tweets', function (req, res) {
-  if (req.body.quote) {
+  if (req.body.tweet) {
     db.tweets.save({
-      tweet: req.body.quote,
+      tweet: req.body.tweet,
       username: req.params.username,
       date: Date.now()
     }, res.json.bind(res, {"error": false}));
