@@ -122,16 +122,16 @@ app.get('/:username/followers', function (req, res) {
   })
 });
 
-app.post('/:username/following', function (req, res) {
-  if (req.body.following) {
+app.post('/:username/follow', function (req, res) {
+  if (req.body.username) {
     db.following.findOne({
       username: req.params.username,
-      following: req.body.following,
+      following: req.body.username,
     }, function (err, found) {
       if (!found) {
         db.following.save({
           username: req.params.username,
-          following: req.body.following,
+          following: req.body.username,
           date: Date.now()
         }, res.json.bind(res, {"error": false}));
       } else {
