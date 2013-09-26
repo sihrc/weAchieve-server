@@ -46,6 +46,10 @@ app.configure('production', function () {
  */
 
 app.get('/', function (req, res) {
+  res.redirect('https://github.com/mobileproto/twitterproto');
+})
+
+app.get('/secret', function (req, res) {
   db.tweets.find({
     // published: true
   }).sort({date: -1}, function (err, docs) {
