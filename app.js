@@ -44,6 +44,18 @@ app.configure('production', function () {
 });
 
 /**
+ * Helpful
+ */
+
+function validateUsername (name) {
+  return String(name).substr(0, 15);
+}
+
+function validateTweet (tweet) {
+  return String(tweet).substr(0, 140);
+}
+
+/**
  * Routes
  */
 
@@ -90,21 +102,25 @@ app.del('/tweets/:id', function (req, res) {
   })
 });
 
+RegExp.escape= function(s) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+};
+
 app.get('/:username/tweets', function (req, res) {
   var query = {
-    username: req.params.username 
+    username: validateUsername(req.params.username)
   };
   if ('q' in req.query) {
-    query.tweet = {$regex: ".*" + req.query.q + ".*"};
+    query.tweet = {$regex: new RegExp(".*" + RegExp.escape(req.query.q) + ".*", i)};
   }
-  db.tweets.find(query).sort({date: -1}, function (err, docs) {
+  db.tweets.find(query).sort({date: -1}).limit(40, function (err, docs) {
     res.json({"tweets": docs});
   })
 });
 
 app.get('/:username/following', function (req, res) {
   db.following.find({
-    username: req.params.username
+    username: validateUsername(req.params.username)
   }, function (err, docs) {
     res.json({"following": docs.map(function (entry) {
       return entry.following;
@@ -114,7 +130,7 @@ app.get('/:username/following', function (req, res) {
 
 app.get('/:username/followers', function (req, res) {
   db.following.find({
-    following: req.params.username
+    following: validateUsername(req.params.username)
   }, function (err, docs) {
     res.json({"followers": docs.map(function (entry) {
       return entry.username;
@@ -125,8 +141,8 @@ app.get('/:username/followers', function (req, res) {
 app.post('/:username/follow', function (req, res) {
   if (req.body.username) {
     db.following.findOne({
-      username: req.params.username,
-      following: req.body.username,
+      username: validateUsername(req.params.username),
+      following: validateUsername(req.body.username)
     }, function (err, found) {
       if (!found) {
         db.following.save({
@@ -145,8 +161,8 @@ app.post('/:username/follow', function (req, res) {
 
 app.del('/:username/following/:following', function (req, res) {
   db.following.remove({
-    username: req.params.username,
-    following: req.params.following
+    username: validateUsername(req.params.username),
+    following: validateUsername(req.params.following)
   }, function (err) {
     res.json({"error": err})
   })
@@ -161,12 +177,12 @@ app.get('/users', function (req, res) {
 app.post('/:username/tweets', function (req, res) {
   if (req.body.tweet) {
     db.tweets.save({
-      tweet: req.body.tweet,
-      username: req.params.username,
+      tweet: validateTweet(req.body.tweet),
+      username: validateUsername(req.params.username),
       date: Date.now()
     }, res.json.bind(res, {"error": false}));
   } else {
-    res.json({error: true, message: 'Invalid quote'}, 500);
+    res.json({error: true, message: 'Invalid tweet, please specify tweet="...." in the body.'}, 500);
   }
 })
 
