@@ -47,7 +47,7 @@ app.configure('production', function () {
 
 app.get('/', function (req, res) {
   db.tweets.find({
-    published: true
+    // published: true
   }).sort({date: -1}, function (err, docs) {
     console.log(docs);
     res.render('index', {
@@ -55,6 +55,22 @@ app.get('/', function (req, res) {
       quotes: docs,
       user: {}
     });
+  })
+});
+
+app.get('/tweets', function (req, res) {
+  db.tweets.find({
+    // published: true
+  }).sort({date: -1}, function (err, docs) {
+    res.json({"tweets": docs});
+  })
+});
+
+app.get('/:username/tweets', function (req, res) {
+  db.tweets.find({
+    username: req.params.username
+  }).sort({date: -1}, function (err, docs) {
+    res.json({"tweets": docs});
   })
 });
 
@@ -71,7 +87,7 @@ app.post('/delete', function (req, res) {
 })
 
 app.get('/users', function (req, res) {
-  db.tweets.distinct('submitter', function (err, names) {
+  db.tweets.distinct('username', function (err, names) {
     res.json(names);
   });
 })
@@ -79,10 +95,9 @@ app.get('/users', function (req, res) {
 app.post('/:username/quotes', function (req, res) {
   if (req.body.quote) {
     db.tweets.save({
-      quote: req.body.quote,
-      submitter: req.params.username,
-      date: Date.now(),
-      published: true
+      tweet: req.body.quote,
+      username: req.params.username,
+      date: Date.now()
     }, res.redirect.bind(res, '/'));
   } else {
     res.json({error: true, message: 'Invalid quote'}, 500);
