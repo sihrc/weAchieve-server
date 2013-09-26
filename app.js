@@ -9,10 +9,12 @@ var express = require('express')
   , mongojs = require('mongojs')
   , MongoStore = require('connect-mongo')(express);
 
+var ObjectId = mongojs.ObjectId;
+
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'twitterproto', ['tweets']);
+  db = mongojs(process.env.MONGOLAB_URI || 'twitterproto', ['tweets', 'following']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -72,6 +74,22 @@ app.get('/tweets', function (req, res) {
   })
 });
 
+app.get('/tweets/:id', function (req, res) {
+  db.tweets.findOne({
+    _id: db.ObjectId(req.params.id)
+  }, function (err, doc) {
+    res.json(doc);
+  })
+});
+
+app.del('/tweets/:id', function (req, res) {
+  db.tweets.remove({
+    _id: ObjectId(req.body.id)
+  }, function (err) {
+    res.json({"error": err})
+  })
+});
+
 app.get('/:username/tweets', function (req, res) {
   var query = {
     username: req.params.username 
@@ -84,17 +102,55 @@ app.get('/:username/tweets', function (req, res) {
   })
 });
 
-app.post('/delete', function (req, res) {
-  db.tweets.update({
-    _id: db.ObjectId(req.body.id)
-  }, {
-    $set: {
-      published: false
-    }
-  }, function () {
-    res.redirect('/');
+app.get('/:username/following', function (req, res) {
+  db.following.find({
+    username: req.params.username
+  }, function (err, docs) {
+    res.json({"following": docs.map(function (entry) {
+      return entry.following;
+    })});
   })
+});
+
+app.get('/:username/followers', function (req, res) {
+  db.following.find({
+    following: req.params.username
+  }, function (err, docs) {
+    res.json({"followers": docs.map(function (entry) {
+      return entry.username;
+    })});
+  })
+});
+
+app.post('/:username/following', function (req, res) {
+  if (req.body.following) {
+    db.following.findOne({
+      username: req.params.username,
+      following: req.body.following,
+    }, function (err, found) {
+      if (!found) {
+        db.following.save({
+          username: req.params.username,
+          following: req.body.following,
+          date: Date.now()
+        }, res.json.bind(res, {"error": false}));
+      } else {
+        res.json({"error": false})
+      }
+    });
+  } else {
+    res.json({error: true, message: 'Invalid following request'}, 500);
+  }
 })
+
+app.del('/:username/following/:following', function (req, res) {
+  db.following.remove({
+    username: req.params.username,
+    following: req.params.following
+  }, function (err) {
+    res.json({"error": err})
+  })
+});
 
 app.get('/users', function (req, res) {
   db.tweets.distinct('username', function (err, names) {
@@ -102,13 +158,13 @@ app.get('/users', function (req, res) {
   });
 })
 
-app.post('/:username/quotes', function (req, res) {
+app.post('/:username/tweets', function (req, res) {
   if (req.body.quote) {
     db.tweets.save({
       tweet: req.body.quote,
       username: req.params.username,
       date: Date.now()
-    }, res.redirect.bind(res, '/'));
+    }, res.json.bind(res, {"error": false}));
   } else {
     res.json({error: true, message: 'Invalid quote'}, 500);
   }
