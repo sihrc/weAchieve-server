@@ -120,9 +120,12 @@ app.get('/:username/following', function (req, res) {
   db.following.find({
     username: validateUsername(req.params.username)
   }, function (err, docs) {
-    res.json({"following": docs.map(function (entry) {
-      return entry.following;
-    })});
+    res.json({
+      "following": docs.map(function (entry) {
+        return entry.following;
+      }),
+      "detail": docs
+    });
   })
 });
 
@@ -130,9 +133,12 @@ app.get('/:username/followers', function (req, res) {
   db.following.find({
     following: validateUsername(req.params.username)
   }, function (err, docs) {
-    res.json({"followers": docs.map(function (entry) {
-      return entry.username;
-    })});
+    res.json({
+      "followers": docs.map(function (entry) {
+        return entry.username;
+      }),
+      "detail": docs
+    });
   })
 });
 
