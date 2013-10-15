@@ -1,59 +1,65 @@
-# twitterproto
+# weachieve
 
 ## API
 
-### Tweeting
-Retrieve, post, and search tweets.
+### Courses
+Get, join, delete courses.
+
+&#x20;<a href="#api-POST-username-course" name="api-POST-username-course">#</a> <b>POST</b> /`:username`/coure  
+Enroll a user in a class. Submit a payload:
+
+```
+{
+  "course": "...course name..."
+}
+```
+
+&#x20;<a href="#api-GET-username-courses" name="api-GET-username-courses">#</a> <b>GET</b> /`:username`/courses  
+Get all classes user is enrolled in. Returns:
+
+```js
+{
+  "courses": [
+    "MobileProto",
+    "Linearity 2"
+  ]
+}
+```
+
+&#x20;<a href="#api-GET-courses" name="api-GET-courses">#</a> <b>GET</b> /courses  
+Get all courses. Returns:
+
+```js
+{
+  "courses": [
+    "MobileProto",
+    "Linearity 2"
+  ]
+}
+```
+
+### Sessions
+Create, join, delete sessions.
 
 &#x20;<a href="#api-GET-tweets" name="api-GET-tweets">#</a> <b>GET</b> /tweets  
-Get all tweets, ever! Returns: 
+Get all sessionss, ever! Returns: 
 
 ```js
 {
-  "tweets": [
+  "sessions": [
     {
-      "status": "Everything happens so much",
-      "datetime": "2013-09-03T00:00:00",
-      "username": "horse_ebooks" 
+      "course": "mob",
+      "task": "database11",
+      "when": "23156545245",
+      "place": "wh2al",
+      "usersAttending": [
+        "maci"
+      ],
+      "_id": "525c938584a1000200000001"
     }
-    ...
   ]
 }
 ```
-
-&#x20;<a href="#api-POST-username-tweets" name="api-POST-username-tweets">#</a> <b>POST</b> /`:username`/tweets  
-Post a new tweet as a user. Your status should be <= 140 characters! Submit a payload:
-
-```
-{
-  "status": "...text..."
-}
-```
-
-&#x20;<a href="#api-GET-username-tweets" name="api-GET-username-tweets">#</a> <b>GET</b> /`:username`/tweets  
-Get all the tweets for a user. Returns:
-
-```js
-{
-  "tweets": [
-    {
-      "status": "Everything happens so much",
-      "datetime": "2013-09-03T00:00:00",
-      "username": "horse_ebooks" 
-    }
-    ...
-  ]
-}
-```
-
-&#x20;<a href="#api-GET-tweets-q-pattern" name="api-GET-tweets-q-pattern">#</a> <b>GET</b> /tweets?q=`:pattern`  
-Search for all tweets that include `:pattern`. See /tweets.
-
-&#x20;<a href="#api-GET-username-tweets-q-pattern" name="api-GET-username-tweets-q-pattern">#</a> <b>GET</b> /`:username`/tweets?q=:pattern  
-Search for all tweets from a user that include `:pattern`. See /`:username`/tweets.
-
-### Follows
-Connect people, see who follows whom, etc.
 
 &#x20;<a href="#api-GET-username-followers" name="api-GET-username-followers">#</a> <b>GET</b> /`:username`/followers  
 See who follows this user. Returns:
