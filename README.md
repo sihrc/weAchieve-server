@@ -5,8 +5,17 @@
 ### Courses
 Get, join, delete courses.
 
-&#x20;<a href="#api-POST-username-course" name="api-POST-username-course">#</a> <b>POST</b> /`:username`/coure  
+&#x20;<a href="#api-POST-username-course" name="api-POST-username-course">#</a> <b>POST</b> /`:username`/course  
 Enroll a user in a class. Submit a payload:
+
+```
+{
+  "course": "...course name..."
+}
+```
+
+&#x20;<a href="#api-POST-username-delCourse" name="api-POST-username-delCourse">#</a> <b>POST</b> /`:username`/delCourse  
+Remove user from class. Submit a payload:
 
 ```
 {
@@ -41,60 +50,64 @@ Get all courses. Returns:
 ### Sessions
 Create, join, delete sessions.
 
-&#x20;<a href="#api-GET-tweets" name="api-GET-tweets">#</a> <b>GET</b> /tweets  
-Get all sessionss, ever! Returns: 
+&#x20;<a href="#api-GET-sessions" name="api-GET-sessions">#</a> <b>GET</b> /sessions  
+Get all sessions. Returns: 
 
 ```js
 {
   "sessions": [
     {
-      "course": "mob",
-      "task": "database11",
-      "when": "23156545245",
-      "place": "wh2al",
+      "course": "MobileProto",
+      "task": "Lab 5",
+      "when": "123436764643254",
+      "place": "WH2AL",
       "usersAttending": [
         "maci"
       ],
-      "_id": "525c938584a1000200000001"
+      "_id": "525cb61fd94d8c0200000001"
     }
   ]
 }
 ```
 
-&#x20;<a href="#api-GET-username-followers" name="api-GET-username-followers">#</a> <b>GET</b> /`:username`/followers  
-See who follows this user. Returns:
+&#x20;<a href="#api-POST-username-delCourse" name="api-POST-username-delCourse">#</a> <b>POST</b> /`:username`/delCourse  
+Create Session. Submit a payload:
 
-```js
+```
 {
-  "followers": [
-    "horse_ebooks",
-    "reyner",
-    "renyer"
-  ]
+  "course": "...course name...",
+  "task": "...task name...",
+  "when": "...time...",
+  "where": "...course nameplace...",
+  "user": "...first user..."
 }
 ```
 
-&#x20;<a href="#api-GET-username-following" name="api-GET-username-following">#</a> <b>GET</b> /`:username`/following  
-See who this user is following. Returns:
+&#x20;<a href="#api-DELETE-delAllSessions321" name="api-DELETE-delAllSessions321">#</a> <b>DELETE</b> /delAllSessions321
+Delete all Sessions. No payload needed.
 
-```js
+&#x20;<a href="#api-POST-delSession-id" name="api-POST-delSession-id">#</a> <b>POST</b> /delSession/`:id`
+Delete Session. No payload needed.
+
+&#x20;<a href="#api-POST-session-addUser" name="api-POST-session-addUser">#</a> <b>POST</b> /`:sessionid`/addUser 
+Add user to session. Submit a payload:
+
+```
 {
-  "following": [
-    "horse_ebooks",
-    "reyner",
-    "renyer"
-  ]
+  "username": "...username...",
 }
 ```
 
-&#x20;<a href="#api-POST-username-follow" name="api-POST-username-follow">#</a> <b>POST</b> /`:username`/follow  
-Make someone follow another person. Submit a payload:
+&#x20;<a href="#api-POST-session-removeUser" name="api-POST-session-removeUser">#</a> <b>POST</b> /`:sessionid`/removeUser 
+remove User from session. Submit a payload:
 
-```js
+```
 {
-  "username": "horse_ebooks"
+  "username": "...username...",
 }
 ```
+
+
 
 
 ## License
