@@ -12,7 +12,7 @@ var express = require('express')
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'twitterproto', ['tweets', 'following']);
+  db = mongojs(process.env.MONGOLAB_URI || 'weachieve', ['tweets', 'following','courses','sessions']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -25,7 +25,7 @@ app.configure(function () {
   app.use(express.session({
     secret: app.get('secret'),
     store: new MongoStore({
-      url: process.env.MONGOLAB_URI || 'mongodb://localhost/twitterproto'
+      url: process.env.MONGOLAB_URI || 'mongodb://localhost/weachieve'
     })
   }));
   app.use(app.router);
@@ -38,7 +38,7 @@ app.configure('development', function () {
 });
 
 app.configure('production', function () {
-  app.set('host', 'twitterproto.herokuapp.com');
+  app.set('host', 'weachieve.herokuapp.com');
 });
 
 /**
@@ -46,7 +46,7 @@ app.configure('production', function () {
  */
 
 function validateUsername (name) {
-  return String(name).substr(0, 15);
+  return String(name).substr(0, 25);
 }
 
 function validateTweet (tweet) {
@@ -58,7 +58,7 @@ function validateTweet (tweet) {
  */
 
 app.get('/', function (req, res) {
-  res.redirect('https://github.com/mobileproto/twitterproto');
+  res.redirect('https://github.com/mobileproto');
 })
 
 app.get('/secret', function (req, res) {
@@ -67,36 +67,10 @@ app.get('/secret', function (req, res) {
   }).sort({date: -1}, function (err, docs) {
     console.log(docs);
     res.render('index', {
-      title: 'TweetProto',
+      title: 'WeAchieve',
       quotes: docs,
       user: {}
     });
-  })
-});
-
-app.get('/tweets', function (req, res) {
-  var query = { };
-  if ('q' in req.query) {
-    query.tweet = {$regex: ".*" + req.query.q + ".*"};
-  }
-  db.tweets.find(query).sort({date: -1}, function (err, docs) {
-    res.json({"tweets": docs});
-  })
-});
-
-app.get('/tweets/:id', function (req, res) {
-  db.tweets.findOne({
-    _id: db.ObjectId(req.params.id)
-  }, function (err, doc) {
-    res.json(doc);
-  })
-});
-
-app.del('/tweets/:id', function (req, res) {
-  db.tweets.remove({
-    _id: db.ObjectId(req.params.id)
-  }, function (err) {
-    res.json({"error": err})
   })
 });
 
@@ -104,91 +78,177 @@ RegExp.escape= function(s) {
     return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 };
 
-app.get('/:username/tweets', function (req, res) {
+/**
+ * get all courses
+ */
+
+app.get('/courses', function (req, res) {
+  db.courses.distinct('course', function (err, names) {
+    res.json({"courses": names});
+  });
+})
+
+/**
+ * get courses user is in 
+ */
+
+app.get('/:username/courses', function (req, res) {
   var query = {
     username: validateUsername(req.params.username)
   };
   if ('q' in req.query) {
-    query.tweet = {$regex: new RegExp(".*" + RegExp.escape(req.query.q) + ".*", i)};
+    query.course = {$regex: new RegExp(".*" + RegExp.escape(req.query.q) + ".*", i)};
   }
-  db.tweets.find(query).sort({date: -1}).limit(40, function (err, docs) {
-    res.json({"tweets": docs});
-  })
-});
-
-app.get('/:username/following', function (req, res) {
-  db.following.find({
-    username: validateUsername(req.params.username)
-  }, function (err, docs) {
+  db.courses.find(query).sort({date: -1}).limit(10, function (err, docs) {
     res.json({
-      "following": docs.map(function (entry) {
-        return entry.following;
+      "courses": docs.map(function (entry) {
+        return entry.course;
       }),
-      "detail": docs
     });
   })
 });
 
-app.get('/:username/followers', function (req, res) {
-  db.following.find({
-    following: validateUsername(req.params.username)
-  }, function (err, docs) {
-    res.json({
-      "followers": docs.map(function (entry) {
-        return entry.username;
-      }),
-      "detail": docs
-    });
-  })
-});
+/**
+ * add course for user
+ */
 
-app.post('/:username/follow', function (req, res) {
-  if (req.body.username) {
-    db.following.findOne({
-      username: validateUsername(req.params.username),
-      following: validateUsername(req.body.username)
-    }, function (err, found) {
-      if (!found) {
-        db.following.save({
-          username: req.params.username,
-          following: req.body.username,
-          date: Date.now()
-        }, res.json.bind(res, {"error": false}));
-      } else {
-        res.json({"error": false})
-      }
-    });
+app.post('/:username/course', function (req, res) {
+  if (req.body.course) {
+    db.courses.save({
+      course: validateTweet(req.body.course),
+      username: validateUsername(req.params.username)
+    }, res.json.bind(res, {"error": false}));
   } else {
-    res.json({error: true, message: 'Invalid following request'}, 500);
+    res.json({error: true, message: 'Invalid course, please specify course="...." in the body.'}, 500);
   }
 })
 
-app.del('/:username/following/:following', function (req, res) {
-  db.following.remove({
+/**
+ * delete course for user
+ */
+
+app.post('/:username/delCourse', function (req, res) {
+  db.courses.remove({
     username: validateUsername(req.params.username),
-    following: validateUsername(req.params.following)
+    course: validateTweet(req.body.course)
   }, function (err) {
     res.json({"error": err})
   })
 });
 
-app.get('/users', function (req, res) {
-  db.tweets.distinct('username', function (err, names) {
-    res.json({"usernames": names});
-  });
-})
+/**
+ * createSession
+ */
 
-app.post('/:username/tweets', function (req, res) {
-  if (req.body.tweet) {
-    db.tweets.save({
-      tweet: validateTweet(req.body.tweet),
-      username: validateUsername(req.params.username),
-      date: Date.now()
+app.post('/createSession', function (req, res) {
+  if (req.body.course && req.body.when && req.body.place && req.body.task && req.body.user) {
+    db.sessions.save({
+      course: validateTweet(req.body.course),
+      task: req.body.task,
+      when: req.body.when,
+      place: req.body.place,
+      usersAttending: [validateUsername(req.body.user)]
     }, res.json.bind(res, {"error": false}));
   } else {
-    res.json({error: true, message: 'Invalid tweet, please specify tweet="...." in the body.'}, 500);
+    res.json({error: true, message: 'Invalid course, please specify course="...." in the body.'}, 500);
   }
 })
+
+/**
+ * get all sessions
+ */
+
+app.get('/sessions', function (req, res) {
+  var query = { };
+  if ('q' in req.query) {
+    query.session = {$regex: ".*" + req.query.q + ".*"};
+  }
+  db.sessions.find(query).sort({date: -1}, function (err, docs) {
+    res.json({"sessions": docs});
+  })
+});
+
+/**
+ * delete session based on id
+ */
+
+app.post('/delSession/:id', function (req, res) {
+  db.sessions.remove({
+    _id: db.ObjectId(req.params.id)
+  }, function (err) {
+    res.json({"error": err})
+  })
+});
+
+app.del('/delSession/:id', function (req, res) {
+  db.sessions.remove({
+    _id: db.ObjectId(req.params.id)
+  }, function (err) {
+    res.json({"error": err})
+  })
+});
+
+/**
+ * delete all sessions
+ */
+
+app.del('/delAllSessions321', function (req, res) {
+  db.sessions.drop();
+  res.json({"error": "???"})
+});
+
+/**
+ * add user to session
+ */
+
+app.post('/:session/addUser', function (req, res) {
+  if (req.body.username) {
+        db.sessions.update(
+          {_id: db.ObjectId(req.params.session)},
+          { $addToSet : { usersAttending: validateUsername(req.body.username) } }
+        )
+        res.json({error: false});
+  } else {
+    res.json({error: true, message: 'Invalid following request'}, 500);
+  }
+});
+
+/**
+ * remove user from session
+ */
+
+app.post('/:session/removeUser', function (req, res) {
+  if (req.body.username) {
+    db.sessions.findOne({
+      _id: db.ObjectId(req.params.session)
+    }, function (err, found) {
+      if (found) {
+        var indexOfUser = found.usersAttending.indexOf(validateUsername(req.body.username));
+        if (indexOfUser > -1) {
+          found.usersAttending.splice(indexOfUser, 1);
+          db.sessions.update(
+            {_id: db.ObjectId(req.params.session)},
+            { $set : { usersAttending: found.usersAttending} }
+          )
+          if (found.usersAttending.length == 0) {
+            db.sessions.remove({
+              _id: db.ObjectId(req.params.session)
+            }, function (err) {
+              console.log(err);
+            })
+          }
+          res.json({"error": false})
+        } else {
+          res.json({error: true, message: 'User was not in session'}, 500);
+        }
+      } else {
+        res.json({error: true, message: 'Invalid Session Id request'}, 500);
+      } 
+    })
+  } else {
+    res.json({error: true, message: 'Invalid following request'}, 500);
+  }
+});
 
 /**
  * Launch
