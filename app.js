@@ -12,7 +12,7 @@ var express = require('express')
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'weachieve', ['tweets', 'following','courses','sessions']);
+  db = mongojs(process.env.MONGOLAB_URI || 'weachieve', ['courses','sessions']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -38,7 +38,7 @@ app.configure('development', function () {
 });
 
 app.configure('production', function () {
-  app.set('host', 'weachieve.herokuapp.com');
+  app.set('host', 'weachieveserver.herokuapp.com');
 });
 
 /**
@@ -58,7 +58,7 @@ function validateTweet (tweet) {
  */
 
 app.get('/', function (req, res) {
-  res.redirect('https://github.com/mobileproto');
+  res.redirect('https://github.com/MaciCrowell/weAchieve-server');
 })
 
 app.get('/secret', function (req, res) {
@@ -141,14 +141,19 @@ app.post('/:username/delCourse', function (req, res) {
  */
 
 app.post('/createSession', function (req, res) {
-  if (req.body.course && req.body.when && req.body.place && req.body.task && req.body.user) {
+  if (req.body.course && req.body.date && req.body.startTime && req.body.endTime && req.body.place && req.body.task && req.body.user) {
+    id = db.ObjectId();
     db.sessions.save({
       course: validateTweet(req.body.course),
       task: req.body.task,
-      when: req.body.when,
+      date: req.body.date,
+      startTime: req.body.startTime,
+      endTime: req.body.endTime,
       place: req.body.place,
-      usersAttending: [validateUsername(req.body.user)]
-    }, res.json.bind(res, {"error": false}));
+      usersAttending: [validateUsername(req.body.user)],
+      _id: id
+    });
+    res.json({error: false, sessionid: id});
   } else {
     res.json({error: true, message: 'Invalid course, please specify course="...." in the body.'}, 500);
   }
