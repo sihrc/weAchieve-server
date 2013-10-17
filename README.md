@@ -59,7 +59,9 @@ Get all sessions. Returns:
     {
       "course": "MobileProto",
       "task": "Lab 5",
-      "when": "123436764643254",
+      "date": "...",
+      "startTime": "...",
+      "endTime": "...",
       "place": "WH2AL",
       "usersAttending": [
         "maci"
@@ -70,15 +72,17 @@ Get all sessions. Returns:
 }
 ```
 
-&#x20;<a href="#api-POST-username-delCourse" name="api-POST-username-delCourse">#</a> <b>POST</b> /`:username`/delCourse  
+&#x20;<a href="#api-POST-createSession" name="api-POST-createSession">#</a> <b>POST</b> /createSession  
 Create Session. Submit a payload:
 
 ```
 {
   "course": "...course name...",
   "task": "...task name...",
-  "when": "...time...",
-  "where": "...course nameplace...",
+  "date": "...date...",
+  "startTime": "...time...",
+  "endTime": "...time...",
+  "place": "...course nameplace...",
   "user": "...first user..."
 }
 ```
