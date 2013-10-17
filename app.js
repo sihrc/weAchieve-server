@@ -142,6 +142,7 @@ app.post('/:username/delCourse', function (req, res) {
 
 app.post('/createSession', function (req, res) {
   if (req.body.course && req.body.date && req.body.startTime && req.body.endTime && req.body.place && req.body.task && req.body.user) {
+    id = db.ObjectId();
     db.sessions.save({
       course: validateTweet(req.body.course),
       task: req.body.task,
@@ -149,8 +150,10 @@ app.post('/createSession', function (req, res) {
       startTime: req.body.startTime,
       endTime: req.body.endTime,
       place: req.body.place,
-      usersAttending: [validateUsername(req.body.user)]
-    }, res.json.bind(res, {"error": false}));
+      usersAttending: [validateUsername(req.body.user)],
+      _id: id
+    });
+    res.json({error: false, sessionid: id});
   } else {
     res.json({error: true, message: 'Invalid course, please specify course="...." in the body.'}, 500);
   }
