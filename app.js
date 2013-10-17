@@ -12,7 +12,7 @@ var express = require('express')
 var app = express(), db;
 
 app.configure(function () {
-  db = mongojs(process.env.MONGOLAB_URI || 'weachieve', ['courses','sessions']);
+  db = mongojs(process.env.MONGOLAB_URI || 'weachieve', ['courses','mySessions']);
   app.set('port', process.env.PORT || 3000);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'jade');
@@ -143,7 +143,7 @@ app.post('/:username/delCourse', function (req, res) {
 app.post('/createSession', function (req, res) {
   if (req.body.course && req.body.date && req.body.startTime && req.body.endTime && req.body.place && req.body.task && req.body.user) {
     id = db.ObjectId();
-    db.sessions.save({
+    db.mySessions.save({
       course: validateTweet(req.body.course),
       task: req.body.task,
       date: req.body.date,
@@ -166,9 +166,9 @@ app.post('/createSession', function (req, res) {
 app.get('/sessions', function (req, res) {
   var query = { };
   if ('q' in req.query) {
-    query.session = {$regex: ".*" + req.query.q + ".*"};
+    query.mySessions = {$regex: ".*" + req.query.q + ".*"};
   }
-  db.sessions.find(query).sort({date: -1}, function (err, docs) {
+  db.mySessions.find(query).sort({date: -1}, function (err, docs) {
     res.json({"sessions": docs});
   })
 });
@@ -178,7 +178,7 @@ app.get('/sessions', function (req, res) {
  */
 
 app.post('/delSession/:id', function (req, res) {
-  db.sessions.remove({
+  db.mySessions.remove({
     _id: db.ObjectId(req.params.id)
   }, function (err) {
     res.json({"error": err})
@@ -186,7 +186,7 @@ app.post('/delSession/:id', function (req, res) {
 });
 
 app.del('/delSession/:id', function (req, res) {
-  db.sessions.remove({
+  db.mySessions.remove({
     _id: db.ObjectId(req.params.id)
   }, function (err) {
     res.json({"error": err})
@@ -198,7 +198,7 @@ app.del('/delSession/:id', function (req, res) {
  */
 
 app.del('/delAllSessions321', function (req, res) {
-  db.sessions.drop();
+  db.mySessions.drop();
   res.json({"error": "???"})
 });
 
@@ -208,7 +208,7 @@ app.del('/delAllSessions321', function (req, res) {
 
 app.post('/:session/addUser', function (req, res) {
   if (req.body.username) {
-        db.sessions.update(
+        db.mySessions.update(
           {_id: db.ObjectId(req.params.session)},
           { $addToSet : { usersAttending: validateUsername(req.body.username) } }
         )
@@ -224,19 +224,19 @@ app.post('/:session/addUser', function (req, res) {
 
 app.post('/:session/removeUser', function (req, res) {
   if (req.body.username) {
-    db.sessions.findOne({
+    db.mySessions.findOne({
       _id: db.ObjectId(req.params.session)
     }, function (err, found) {
       if (found) {
         var indexOfUser = found.usersAttending.indexOf(validateUsername(req.body.username));
         if (indexOfUser > -1) {
           found.usersAttending.splice(indexOfUser, 1);
-          db.sessions.update(
+          db.mySessions.update(
             {_id: db.ObjectId(req.params.session)},
             { $set : { usersAttending: found.usersAttending} }
           )
           if (found.usersAttending.length == 0) {
-            db.sessions.remove({
+            db.mySessions.remove({
               _id: db.ObjectId(req.params.session)
             }, function (err) {
               console.log(err);
