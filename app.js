@@ -38,7 +38,7 @@ app.configure('development', function () {
 });
 
 app.configure('production', function () {
-  app.set('host', 'weachieveserver.herokuapp.com');
+  app.set('host', 'weachieve-olin.herokuapp.com');
 });
 
 /**
@@ -58,7 +58,7 @@ function validateTweet (tweet) {
  */
 
 app.get('/', function (req, res) {
-  res.redirect('https://github.com/MaciCrowell/weAchieve-server');
+  res.redirect('https://github.com/sihrc/weAchieve-server');
 })
 
 app.get('/secret', function (req, res) {
